@@ -1,108 +1,70 @@
-var express = require('express');
-var app = express();
-
-const port = process.env.PORT || 3000;
-
+// Importation des modules nécessaires
+const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
+
+// Création de l'application Express
+const app = express();
 app.use(bodyParser.json());
 
-var data={};
-var id=0;
+// Stockage des annotations
+const annotations = {};
 
-app.use(express.static('html'));
+// Route pour créer une annotation
+app.post('/annotations', (req, res) => {
+    const { annotationURI, resourceURI, content, format } = req.body;
+    if (!annotationURI || !resourceURI || !content || !format) {
+        return res.status(400).send('Tous les champs sont requis.');
+    }
+    if (annotations.hasOwnProperty(annotationURI)) {
+        return res.status(409).send('Une annotation avec cet URI existe déjà.');
+    }
+    annotations[annotationURI] = { resourceURI, content, format };
+    res.status(201).send('Annotation créée avec succès.');
+  });
+  
 
-	
-app.post("/annotation", function(req, res){
-	var body = req.body;
-	data[id]=body;
-	console.log(data);
-	id++;
-	res.send("Votre commentaire a bien été pris en compte et porte l'identifiant "+(id-1));
+// Route pour récupérer une annotation
+app.get('/annotations/:annotationURI', (req, res) => {
+    const annotationURI = req.params.annotationURI;
+    const annotation = annotations[annotationURI];
+    if (!annotation) {
+        return res.status(404).send('Annotation introuvable.');
+    }
+    res.json(annotation);
 });
 
-
-app.get("/IdAnnot/:Annot", function(req, res){
-	var IdAnnot = req.params.Annot;
-	
-	
-	var Exist=Object.keys(data).includes(IdAnnot);
-	
-	res.format ({
-		   'text/html': function() {
-			    if (Exist){
-					res.setHeader('Content-Type', 'text/html');
-				    res.send("<!DOCTYPE html><html lang='fr'><head><meta charset='UTF-8'/><title>Titre</title></head><body><div>"+JSON.stringify(data[IdAnnot])+
-							"</div></body></html>"); 
-			    }
-			    else {
-				   res.send("aucune annotation n'est associée à cette clé");
-			    }
-		   },
-
-		   'application/json': function() {
-			    if (Exist){
-				    res.send(data[IdAnnot]); 
-			    }
-			    else {
-				   res.send("aucune annotation n'est associée à cette clé");
-			    }
-			}
-	});
-	
+// Route pour récupérer toutes les annotations portant sur une ressource
+app.get('/resources/:resourceURI/annotations', (req, res) => {
+    const resourceURI = req.params.resourceURI;
+    const resourceAnnotations = Object.values(annotations).filter(
+        (annotation) => annotation.resourceURI === resourceURI
+    );
+    res.json(resourceAnnotations);
 });
 
-app.get("/AllAnnot", function(req, res){
-	
-	res.format ({
-		   'text/html': function() {
-				res.setHeader('Content-Type', 'text/html');
-				res.send("<!DOCTYPE html><html lang='fr'><head><meta charset='UTF-8'/><title>Titre</title></head><body><div>"+JSON.stringify(data)+
-						"</div></body></html>"); 
-		   },
-
-		   'application/json': function() {
-				res.send(data); 
-			}
-	});
-	
+// Route pour récupérer toutes les annotations de notre serveur
+app.get('/annotations', (req, res) => {
+    const annotationsArray = Object.entries(annotations).map(([annotationURI, annotation]) => {
+        return { annotationURI, ...annotation };
+    });
+    res.json(annotationsArray);
 });
+  
 
-
-app.get("/URI/:AnnotURI", function(req, res){
-	var IdURI = req.params.AnnotURI;
-	console.log(IdURI);
-	IdURI = "https://"+IdURI;
-	
-	var tabRep=[];
-	
-	for (key in data){
-		console.log(key);
-		if (data[key]["URI"]==IdURI){
-			tabRep.push({"IdAnnotation" : data[key], "Commentaire" : data[key]["Commentaire"]});
-		}
-	}
-	
-	console.log(tabRep);
-	
-	res.format ({
-		   'text/html': function() {
-				res.setHeader('Content-Type', 'text/html');
-				res.send("<!DOCTYPE html><html lang='fr'><head><meta charset='UTF-8'/><title>Titre</title></head><body><div>"+JSON.stringify(tabRep)+
-						"</div></body></html>"); 
-		   },
-
-		   'application/json': function() {
-				res.send(tabRep); 
-			}
-	});
-	
-});
+// Fonction pour importer des annotations d'un serveur tiers
+async function importAnnotationsFromThirdPartyServer(serverURL) {
+    // Utiliser "fetch" ou une autre bibliothèque pour récupérer les données à partir de serverURL
+    // Ajouter les annotations importées à notre objet "annotations"
+}
 
 // Lignes pour servir le fichier client.html à la racine
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, "Main.html"));
+    res.sendFile(path.join(__dirname, 'client.html'));
 });
 
-app.listen(port, function(){
-	console.log('serveur listening on port : '+port);
+// Démarrage du serveur
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Serveur en écoute sur le port ${PORT}`);
 });
