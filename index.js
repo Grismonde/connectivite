@@ -1,7 +1,7 @@
 // Importation des modules nécessaires
-const express = require('express'); // Permet le référencement 
-const bodyParser = require('body-parser'); 
-const path = require('path'); // Récupère le chemin 
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
 
 // Création de l'application Express
 const app = express();
@@ -35,13 +35,24 @@ app.get('/annotations/:annotationURI', (req, res) => {
 });
 
 // Route pour récupérer toutes les annotations portant sur une ressource
-app.get('/resources/:resourceURI/annotations', (req, res) => {
-    const resourceURI = req.params.resourceURI;
-    const resourceAnnotations = Object.values(annotations).filter(
-        (annotation) => annotation.resourceURI === resourceURI
-    );
-    res.json(resourceAnnotations);
+app.get('/annotations', (req, res) => {
+    const resourceURI = req.query.resourceURI;
+    if (resourceURI) {
+        const resourceAnnotations = Object.entries(annotations)
+            .filter(([annotationURI, annotation]) => annotation.resourceURI === resourceURI)
+            .map(([annotationURI, annotation]) => {
+                return { annotationURI, ...annotation };
+            });
+        res.json(resourceAnnotations);
+    } else {
+        const annotationsArray = Object.entries(annotations).map(([annotationURI, annotation]) => {
+            return { annotationURI, ...annotation };
+        });
+        res.json(annotationsArray);
+    }
 });
+
+
 
 // Route pour récupérer toutes les annotations de notre serveur
 app.get('/annotations', (req, res) => {
