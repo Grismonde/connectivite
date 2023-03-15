@@ -14,9 +14,7 @@ app.use(express.static('html'));
 	
 app.post("/annotation", function(req, res){
 	var body = req.body;
-	// console.log(body);
 	data[id]=body;
-	// data.push(body);
 	console.log(data);
 	id++;
 	res.send("Votre commentaire a bien été pris en compte et porte l'identifiant "+(id-1));
@@ -24,29 +22,10 @@ app.post("/annotation", function(req, res){
 
 
 app.get("/IdAnnot/:Annot", function(req, res){
-	// var IdAnnot = req.query.Annot;
 	var IdAnnot = req.params.Annot;
 	
 	
 	var Exist=Object.keys(data).includes(IdAnnot);
-	
-	// var ChoixFormat=req.query.FormatIdAnnot;
-	// var ChoixFormat=req.params.FormatIdAnnot;
-	
-	// console.log(req);
-	
-	// console.log(req.headers['accept']);
-	
-	// if (ChoixFormat=="html"){
-		// req.headers['accept']= 'text/html';
-	// }
-	// else {
-		// if (ChoixFormat=="Json"){
-			// req.headers['accept']=  'application/json';
-		// }	
-	// }
-	
-	// console.log(req.headers['accept']);
 	
 	res.format ({
 		   'text/html': function() {
@@ -72,9 +51,6 @@ app.get("/IdAnnot/:Annot", function(req, res){
 	
 });
 
-
-
-
 app.get("/AllAnnot", function(req, res){
 	
 	res.format ({
@@ -89,38 +65,13 @@ app.get("/AllAnnot", function(req, res){
 			}
 	});
 	
-	// var ChoixFormat=req.query.FormatAllAnnot;
-	
-	
-	// if (ChoixFormat=="html"){
-		// req.headers['accept']= 'text/html';
-	// }
-	// else {
-		// if (ChoixFormat=="Json"){
-			// req.headers['accept']=  'application/json';
-		// }	
-	// }
-		
-	// res.format ({
-		   // 'text/html': function() {
-			  // res.send(data); 
-		   // },
-
-		   // 'application/json': function() {
-			  // res.send(data);
-			// }
-	// });
-	
 });
 
 
 app.get("/URI/:AnnotURI", function(req, res){
-	// var IdURI = req.query.AnnotURI;
 	var IdURI = req.params.AnnotURI;
 	console.log(IdURI);
 	IdURI = "https://"+IdURI;
-	
-	// var ChoixFormat=req.query.FormatAnnotURI;
 	
 	var tabRep=[];
 	
@@ -145,30 +96,12 @@ app.get("/URI/:AnnotURI", function(req, res){
 			}
 	});
 	
-	// if (ChoixFormat=="html"){
-		// req.headers['accept']= 'text/html';
-	// }
-	// else {
-		// if (ChoixFormat=="Json"){
-			// req.headers['accept']=  'application/json';
-		// }	
-	// }
-		
-	// res.format ({
-		   // 'text/html': function() {
-			  // res.send(tabRep); 
-		   // },
-
-		   // 'application/json': function() {
-			  // res.send(tabRep);
-			// }
-	// });
-	
 });
 
-
-
-
+// Lignes pour servir le fichier client.html à la racine
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, "Main.html"));
+});
 
 app.listen(port, function(){
 	console.log('serveur listening on port : '+port);
