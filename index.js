@@ -1,7 +1,7 @@
 // Importation des modules nécessaires
-const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
+const express = require('express'); // Permet le référencement 
+const bodyParser = require('body-parser'); 
+const path = require('path'); // Récupère le chemin 
 
 // Création de l'application Express
 const app = express();
